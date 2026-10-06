@@ -117,6 +117,62 @@
 
 - Step 27 : The results were further validated using the original Excel dataset by creating a PivotTable with Employment Type in Rows and Default in Values with the aggregation set to Count. Default was also added to the Filters area and filtered for the value 1 (TRUE). The count for each Employment Type was divided by the total number of default cases (we can get this from PBI validation table, it comes out to be 255347, bring it to excel sheet (c4,c7) corresponding to the count of default values (let say existing from b4,b7) and then divide ) to calculate the default rate. The resulting percentages matched the values obtained from the DAX measure.  
 
+  Snap of the Excel validation:
+
+  ![Default Rate by Employment Type validated in Excel](Default_Rate_by_Employment_Type_Excel_Validation.png)
 
 
 
+- Step 28 : An Age Groups calculated column was created because the original dataset did not contain an age group column. The Age column was used to categorize customers into Teen, Adults, Middle Age Adults, and Senior Citizens.
+
+  Following DAX expression was written to create the Age Groups column,
+
+        Age Groups = 
+        IF('Loan_default'[Age]<=19,"Teen",
+            IF('Loan_default'[Age]<=39,"Adults",
+                IF('Loan_default'[Age]<=59,"Middle Age Adults",
+                "Senior Citizens")))
+
+- Step 29 : A new measure was created in Measures Table 1 to calculate the average loan amount by age group using the AVERAGEX and VALUES functions.
+
+  Following DAX expression was written to calculate the average loan amount by age group,
+
+        Average Loan by Age Groups = 
+        AVERAGEX(VALUES('Loan_default'[Age Groups]),AVERAGE('Loan_default'[LoanAmount]))
+
+  A line chart was used to represent the average loan amount by age group, with Age Groups on the X-axis and Average Loan by Age Groups on the Y-axis.
+
+  Snap of the line chart:
+
+![Average Loan by Age Groups](Average_Loan_by_Age_Groups.png)
+
+- Step 30 : The Average Loan by Age Groups measure was validated using a table visual in Power BI by adding Age Groups and the average of LoanAmount.
+
+- Step 31 : The results were further validated using the original Excel dataset by using Age as a filter, selecting the required age groups, and calculating the Average of Loan Amount in the Values section. The values matched the results obtained from the DAX measure.
+
+- Step 32 : A new measure was created to calculate the default rate by year. Variables were used to calculate the total number of loans and the total number of default cases for each year.
+
+  Following DAX expression was written to calculate the default rate by year,
+
+        Default rate by Year = 
+        VAR TotalLoans=
+                        CALCULATE(COUNTROWS('Loan_default'),ALLEXCEPT('Loan_default',Loan_default[Year]))
+
+        VAR Default= CALCULATE(COUNTROWS(FILTER('Loan_default','Loan_default'[Default]=TRUE())),ALLEXCEPT('Loan_default',Loan_default[Year]))  
+
+        RETURN
+        DIVIDE(Default,TotalLoans)*100
+
+  A line chart was used to represent the default rate by year, with Year on the X-axis and Default rate by Year on the Y-axis.
+
+  Snap of the line chart:
+
+![Default Rate by Year](Default_Rate_by_Year.png)
+
+- Step 33 : The Default rate by Year measure was validated using a table visual in Power BI by adding Year and Default, with the Default field aggregated as Count. The calculated values were compared with the results obtained from the DAX measure.
+
+### Loan Default Overview
+
+The Loan Default Overview page looks like this:
+
+![Loan Default Overview](Loan_Default_Overview.png)
