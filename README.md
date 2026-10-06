@@ -113,9 +113,9 @@
 
   ![Default Rate by Employment Type](Default_Rate_by_Employment_Type.png)
 
-- Step 26 : The Default Rate by Employment type measure was validated using a table visual in Power BI. Employment Type and Default were added to the visual. The Default column was added again and its aggregation was changed to Count, which was then displayed as a percentage. The percentage for Default = TRUE was compared with the values obtained from the DAX measure.
+- Step 25 : The Default Rate by Employment type measure was validated using a table visual in Power BI. Employment Type and Default were added to the visual. The Default column was added again and its aggregation was changed to Count, which was then displayed as a percentage. The percentage for Default = TRUE was compared with the values obtained from the DAX measure.
 
-- Step 27 : The results were further validated using the original Excel dataset by creating a PivotTable with Employment Type in Rows and Default in Values with the aggregation set to Count. Default was also added to the Filters area and filtered for the value 1 (TRUE). The count for each Employment Type was divided by the total number of default cases (we can get this from PBI validation table, it comes out to be 255347, bring it to excel sheet (c4,c7) corresponding to the count of default values (let say existing from b4,b7) and then divide ) to calculate the default rate. The resulting percentages matched the values obtained from the DAX measure.  
+- Step 26 : The results were further validated using the original Excel dataset by creating a PivotTable with Employment Type in Rows and Default in Values with the aggregation set to Count. Default was also added to the Filters area and filtered for the value 1 (TRUE). The count for each Employment Type was divided by the total number of default cases (The total number of default cases obtained from the Power BI validation table was used as the denominator in Excel to calculate the default rate for each employment type ) to calculate the default rate. The resulting percentages matched the values obtained from the DAX measure.  
 
   Snap of the Excel validation:
 
@@ -123,7 +123,7 @@
 
 
 
-- Step 28 : An Age Groups calculated column was created because the original dataset did not contain an age group column. The Age column was used to categorize customers into Teen, Adults, Middle Age Adults, and Senior Citizens.
+- Step 27 : An Age Groups calculated column was created because the original dataset did not contain an age group column. The Age column was used to categorize customers into Teen, Adults, Middle Age Adults, and Senior Citizens.
 
   Following DAX expression was written to create the Age Groups column,
 
@@ -133,7 +133,7 @@
                 IF('Loan_default'[Age]<=59,"Middle Age Adults",
                 "Senior Citizens")))
 
-- Step 29 : A new measure was created in Measures Table 1 to calculate the average loan amount by age group using the AVERAGEX and VALUES functions.
+- Step 28 : A new measure was created in Measures Table 1 to calculate the average loan amount by age group using the AVERAGEX and VALUES functions.
 
   Following DAX expression was written to calculate the average loan amount by age group,
 
@@ -146,11 +146,11 @@
 
 ![Average Loan by Age Groups](Average_Loan_by_Age_Groups.png)
 
-- Step 30 : The Average Loan by Age Groups measure was validated using a table visual in Power BI by adding Age Groups and the average of LoanAmount.
+- Step 29 : The Average Loan by Age Groups measure was validated using a table visual in Power BI by adding Age Groups and the average of LoanAmount.
 
-- Step 31 : The results were further validated using the original Excel dataset by using Age as a filter, selecting the required age groups, and calculating the Average of Loan Amount in the Values section. The values matched the results obtained from the DAX measure.
+- Step 30 : The results were further validated using the original Excel dataset by using Age as a filter, selecting the required age groups, and calculating the Average of Loan Amount in the Values section. The values matched the results obtained from the DAX measure.
 
-- Step 32 : A new measure was created to calculate the default rate by year. Variables were used to calculate the total number of loans and the total number of default cases for each year.
+- Step 31 : A new measure was created to calculate the default rate by year. Variables were used to calculate the total number of loans and the total number of default cases for each year.
 
   Following DAX expression was written to calculate the default rate by year,
 
@@ -169,10 +169,53 @@
 
 ![Default Rate by Year](Default_Rate_by_Year.png)
 
-- Step 33 : The Default rate by Year measure was validated using a table visual in Power BI by adding Year and Default, with the Default field aggregated as Count. The calculated values were compared with the results obtained from the DAX measure.
+- Step 32 : The Default rate by Year measure was validated using a table visual in Power BI by adding Year and Default, with the Default field aggregated as Count. The calculated values were compared with the results obtained from the DAX measure.
 
 ### Loan Default Overview
 
 The Loan Default Overview page looks like this:
 
 ![Loan Default Overview](Loan_Default_Overview.png)
+
+- Step 33 : A new Measures Table 2 was created to store the measures used on the new report page.
+
+- Step 34 : A new page was added to the Power BI report and named **Applicant Demographics and Financial Profile**.
+
+- Step 35 : A new measure was created to calculate the median loan amount using the MEDIANX DAX function.
+
+  Following DAX expression was written to calculate the median loan amount,
+
+        Median by Credit Score Bins = 
+        MEDIANX('Loan_default','Loan_default'[LoanAmount])
+
+  A card visual was used to represent the calculated median loan amount. The card displayed a value of approximately 127.56K.
+
+- Step 36 : The median loan amount was manually validated using the Loan Amount column.
+
+  The Loan Amount column was sorted in ascending order, and the column profile was checked using the complete dataset. The total number of records was 255347, and the middle observation was identified based on the total number of records.
+
+  An Index column starting from 1 was used to locate the middle observation. The Loan Amount corresponding to the middle observation was checked and compared with the value displayed in the card visual.
+
+  The manually checked median value matched the value obtained from the MEDIANX measure.
+
+- Step 37 : A Credit Score Bins calculated column was created in the Loan_default table to categorize customers based on their credit score.
+
+  The credit score was divided into four categories: Very Low, Low, Medium, and High.
+
+  Following DAX expression was written to create the Credit Score Bins column,
+
+        Credit Score Bins = 
+        IF(Loan_default[CreditScore]<=400,"Very Low",
+            IF('Loan_default'[CreditScore]<=450,"Low",
+                IF('Loan_default'[CreditScore]<=650,"Medium",
+                "High")))
+
+
+
+- Step 38 : The card visual used to represent the overall median loan amount was removed.
+
+  A line chart was created to represent the median loan amount by credit score category, with Credit Score Bins on the X-axis and Median by Credit Score Bins on the Y-axis.
+
+  Snap of the line chart:
+
+![Median Loan Amount by Credit Score Category](Median_Loan_Amount_by_Credit_Score_Category.png)
