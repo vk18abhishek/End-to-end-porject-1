@@ -219,3 +219,106 @@ The Loan Default Overview page looks like this:
   Snap of the line chart:
 
 ![Median Loan Amount by Credit Score Category](Median_Loan_Amount_by_Credit_Score_Category.png)
+
+- Step 39 : A new measure was created to calculate the average loan amount for customers with High credit score.
+
+  Following DAX expression was written to calculate the average loan amount for High credit customers,
+
+        Average Loan Amount(High Credit) = 
+        AVERAGEX(FILTER('Loan_default','Loan_default'[Credit Score Bins]="High"),'Loan_default'[LoanAmount])
+
+- Step 40 : A donut chart was created to represent the average loan amount for High credit customers by age group and marital status. Average Loan Amount(High Credit) was added to Values, Marital Status was added to Details, and Age Groups was added to Legend.
+
+  Snap of the donut chart:
+
+![Average Loan Amount(High Credit) by Age Groups and MaritalStatus](Average_Loan_Amount_High_Credit.png)
+
+- Step 41 : The Average Loan Amount(High Credit) measure was validated using a table visual in Power BI by adding Marital Status, Age Groups, Credit Score Bins, and Loan Amount with the aggregation set to Average. The values were compared with the results obtained from the measure.
+
+- Step 42 : The results were further validated using the original Excel dataset. Since the original dataset did not contain a separate identifier for High credit customers, a helper column was created to identify customers with a High credit score.
+
+  Following Excel formula was used to create the Credit Bin High Credit column,
+
+        =IF(E2>650,"High","N/A")
+
+  A PivotTable was then created with Marital Status in Rows and Average of Loan Amount in Values. The Credit Bin High Credit field was added to the Filters area and filtered for High.
+
+  Age was then used as a filter, and the values 18 and 19 were selected to represent the Teen age group. The resulting average loan amounts were compared with the values obtained from the Power BI measure.
+
+- Step 43 : A new measure was created in Measures Table 2 to calculate the total loan amount for Adults by credit score bins.
+
+  Following DAX expression was written to calculate the total loan amount for Adults by credit score bins,
+
+        Total Loan (Credit Bins) = 
+        CALCULATE(SUM('Loan_default'[LoanAmount]),'Loan_default'[Age Groups]="Adults",ALLEXCEPT('Loan_default','Loan_default'[Age],'Loan_default'[Age Groups],'Loan_default'[CreditScore],'Loan_default'[Credit Score Bins]))
+
+  A line chart was used to represent the total loan amount by credit score bins, with Credit Score Bins on the X-axis and Total Loan (Credit Bins) on the Y-axis.
+
+  Snap of the line chart:
+
+![Total Loan by Credit Score Bins for Adults](Total_Loan_Adults_by_Credit_Score_Bins.png)
+
+- Step 44 : The Total Loan (Credit Bins) measure was validated using a table visual in Power BI by adding Age Groups, Credit Score Bins, and Loan Amount with the aggregation set to Sum. The values were compared with the results obtained from the measure.
+
+- Step 45 : The results were further validated using the original Excel dataset. Since the original dataset did not contain an Age Groups column, a helper column was created to identify the Adult age group.
+
+  Following Excel formula was used to create the Age Group Adults column,
+
+        =IF(AND(B2>=20,B2<=39),"Adults","N/A")
+
+  A PivotTable was then created with Age Group Adults in the Filters area and Credit Score Bins in Rows. The Age Group Adults filter was set to Adults, and Loan Amount was added to Values with the aggregation set to Sum.
+
+  The resulting total loan amounts were compared with the values obtained from the Power BI measure.
+
+
+- Step 46 : A new measure was created in Measures Table 2 to calculate the total loan amount for Middle Age Adults.
+
+  Following DAX expression was written to calculate the total loan amount for Middle Age Adults,
+
+        Total Loan (Middle Age Adults) = 
+        SUMX(FILTER('Loan_default','Loan_default'[Age Groups]="Middle Age Adults"),'Loan_default'[LoanAmount])
+
+- Step 47 : A clustered column chart was created to represent the total loan amount for Middle Age Adults by mortgage and dependent status. HasMortgage was added to the X-axis, Total Loan (Middle Age Adults) was added to the Y-axis, and HasDependents was added to the Legend.
+
+  Snap of the clustered column chart:
+
+![Total Loan Middle Age Adults by Mortgage and Dependents](Total_Loan_Middle_Age_Adults_by_Mortgage_Dependents.png)
+
+- Step 48 : The Total Loan (Middle Age Adults) measure was validated using a table visual in Power BI by adding HasMortgage, HasDependents, and Loan Amount with the aggregation set to Sum. The values were compared with the results obtained from the measure.
+
+- Step 49 : The results were further validated using the original Excel dataset. Since the original dataset did not contain an identifier for Middle Age Adults, a helper column was created to identify customers between 40 and 59 years of age.
+
+  Following Excel formula was used to create the Middle Age Adults column,
+
+        =IF(AND(B2>=40,B2<=59),"Middle Age Adults","N/A")
+
+  A PivotTable was then created with the Middle Age Adults column in the Filters area and filtered for Middle Age Adults. HasMortgage was also added to the Filters area and filtered for Yes. HasDependents was added to Rows, and Loan Amount was added to Values with the aggregation set to Sum.
+
+  The resulting total loan amounts were compared with the values obtained from the Power BI measure.
+
+- Step 50 : A new measure was created in Measures Table 2 to calculate the total number of loans by education type.
+
+  Following DAX expression was written to calculate the number of loans by education type,
+
+        Loans by Education Type = 
+        COUNTROWS(FILTER('Loan_default',NOT(ISBLANK('Loan_default'[LoanID]))))
+
+  The measure uses COUNTROWS along with the ISBLANK and NOT functions to count only those records where Loan ID is not blank.
+
+  A line chart was used to represent the number of loans by education type, with Education on the X-axis and Loans by Education Type on the Y-axis.
+
+  Snap of the line chart:
+
+![Total Number of Loans by Education Type](Total_Loans_by_Education_Type.png)
+
+- Step 51 : The Loans by Education Type measure was validated using a table visual in Power BI by adding Education and Loan ID with the aggregation set to Count. Loan ID was also filtered using advanced filtering to include only records where Loan ID is not blank.
+
+  The resulting counts were compared with the values obtained from the measure.
+
+- Step 52 : The second page of the Power BI report was completed with the above visuals and validations.
+
+### Applicant Demographics & Financial Profile
+
+The Applicant Demographics & Financial Profile page looks like this:
+
+![Applicant Demographics & Financial Profile](Applicant_Demographics_Financial_Profile.png)
