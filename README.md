@@ -1,6 +1,13 @@
 
 # End-to-End Power BI Project 1
 
+## Problem Statement
+
+This dashboard helps financial institutions analyze loan portfolio performance and identify patterns associated with loan defaults. It provides insights into loan amounts, default rates, borrower demographics, credit score categories, income, employment type, marital status, and education.
+
+By analyzing these factors, the dashboard helps identify borrower segments with different levels of financial risk and understand how loan exposure varies across customer categories. It also provides year-over-year and year-to-date analysis of loan amounts and default loans, helping monitor changes in the loan portfolio over time.
+
+The dashboard can therefore support data-driven analysis of loan portfolio risk and help identify areas that may require further attention.
 ### Data Source - Data Flow
 
 ### Steps followed
@@ -322,3 +329,144 @@ The Loan Default Overview page looks like this:
 The Applicant Demographics & Financial Profile page looks like this:
 
 ![Applicant Demographics & Financial Profile](Applicant_Demographics_Financial_Profile.png)
+
+- Step 53 : A new page was added to the Power BI report and named **Financial Risk Matrix**.
+
+- Step 54 : A new Measures Table 3 was created to store the measures used on the Financial Risk Matrix page.
+
+- Step 55 : A new measure was created to calculate the Year-over-Year (YoY) change in loan amount.
+
+  The YoY percentage change was calculated by dividing the difference between the current year's loan amount and the previous year's loan amount by the previous year's loan amount, and multiplying the result by 100.
+
+  Following DAX expression was written to calculate the YoY loan amount change,
+
+        YOY Loan Amount Change = 
+        DIVIDE(
+               CALCULATE(SUM('Loan_default'[LoanAmount]),'Loan_default'[Year]=YEAR(max('Loan_default'[Loan_Date_DD_MM_YYYY] )))-
+               CALCULATE(Sum('Loan_default'[LoanAmount]),'Loan_default'[Year]=YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY]))-1)
+
+            , CALCULATE(Sum('Loan_default'[LoanAmount]),'Loan_default'[Year]=YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY]))-1),0)*100
+
+  A line chart was used to represent the YoY change in loan amount, with Year on the X-axis and YOY Loan Amount Change on the Y-axis.
+
+  Snap of the line chart:
+
+![YOY Loan Amount Change](YOY_Loan_Amount_Change.png)
+
+- Step 56 : The YOY Loan Amount Change measure was formatted to display the required decimal precision. The decimal places were increased using the Measure tools formatting options.
+
+  For the year 2013, the measure returns 0 because 2013 is the earliest year available in the dataset and there is no previous year available for comparison. The alternate result of 0 was provided in the DIVIDE function for this case.
+
+  For subsequent years, the measure represents the percentage change in loan amount compared with the previous year.
+
+- Step 57 : A new measure was created in Measures Table 3 to calculate the Year-over-Year (YoY) change in the number of default loans.
+
+  Following DAX expression was written to calculate the YoY change in default loans,
+
+        YOY Default Loans Change = 
+        DIVIDE(
+              CALCULATE(COUNTROWS(FILTER('Loan_default',Loan_default[Default]=TRUE())),'Loan_default'[Year]=YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY])))
+               -
+              CALCULATE(COUNTROWS(FILTER('Loan_default','Loan_default'[Default]=TRUE())),'Loan_default'[Year]=YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY]))-1)
+
+            ,CALCULATE(COUNTROWS(FILTER('Loan_default','Loan_default'[Default]=TRUE())),'Loan_default'[Year]=YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY]))-1),0) *100
+
+  The measure was formatted to display up to five decimal places using the Measure tools formatting options.
+
+  A line chart was used to represent the YoY change in default loans, with Year on the X-axis and YOY Default Loans Change on the Y-axis.
+
+  Snap of the line chart:
+
+![YOY Default Loans Change](YOY_Default_Loans_Change.png)
+
+- Step 58 : A new measure was created in Measures Table 3 to calculate the Year-to-Date (YTD) loan amount.
+
+  YTD loan amount represents the cumulative loan amount from the beginning of the year up to the latest available date in the dataset. The DATESYTD function was used to return the dates from the beginning of the year up to the current date context.
+
+  ALLEXCEPT was used so that the calculation is affected only by Credit Score Bins and MaritalStatus when used with other visuals.
+
+  Following DAX expression was written to calculate the YTD loan amount,
+
+        YTD Loan Amount = 
+        CALCULATE(SUM('Loan_default'[LoanAmount]),DATESYTD('Loan_default'[Loan_Date_DD_MM_YYYY].[Date]),ALLEXCEPT('Loan_default','Loan_default'[Credit Score Bins],'Loan_default'[MaritalStatus]))
+
+  A ribbon chart was used to represent the YTD loan amount by Credit Score Bins and MaritalStatus, with Credit Score Bins and MaritalStatus used to analyze the YTD loan amount.
+
+  Snap of the ribbon chart:
+
+![YTD Loan Amount by Credit Score Bins and MaritalStatus](YTD_Loan_Amount_Credit_Score_Bins_MaritalStatus.png)
+
+- Step 59 : An Income Bracket calculated column was created in the Loan_default table to categorize customers based on their income.
+
+  The income was divided into three categories: Low Income, Medium Income, and High Income.
+
+  Following DAX expression was written to create the Income Bracket column,
+
+        Income Bracket = 
+        SWITCH(
+            TRUE(),
+            'Loan_default'[Income]<30000,"Low Income",
+            'Loan_default'[Income]>=30000 && 'Loan_default'[Income]<60000,"Medium Income",
+            'Loan_default'[Income]>=60000,"High Income")
+
+- Step 60 : A decomposition tree was added to the canvas to analyze the breakup of the total loan amount.
+
+  Loan Amount with the aggregation set to Sum was added to Analyze. Income Bracket and Employment Type were added to Explain by.
+
+  The decomposition tree was used to explore the loan amount by selecting different categories and further breaking down the result based on the selected fields.
+
+  Snap of the decomposition tree:
+
+![Loan Amount Decomposition Tree](Loan_Amount_Decomposition_Tree.png)
+
+- Step 61 : The decomposition tree was further explored by selecting different breakdown options. The required breakdown could also be locked after selecting the desired category.
+
+### Financial Risk Matrix
+
+The Financial Risk Matrix page looks like this:
+
+![Financial Risk Matrix](Financial_Risk_Matrix.png)
+
+- Step 62 : The refresh settings for the Dataflow were configured so that the data in the Dataflow can be updated when the source data in SQL Server changes.
+
+  The SQL Server database was used as the source for the Dataflow. The Dataflow can be refreshed manually or configured for a scheduled refresh.
+
+- Step 63 : A full refresh updates the complete dataset in the Dataflow whenever the refresh is performed. An incremental refresh can be used when only a defined portion of the data needs to be refreshed, which can reduce the refresh time.
+
+- Step 64 : The Dataflow was opened from the Power BI Workspace and the **Schedule Refresh** option was selected.
+
+  Under **Data Source Credentials**, the required access was provided by the administrator.
+
+  Under **Refresh**, the refresh schedule was configured using the required time zone of UTC +05:30 and the required refresh frequency.
+
+- Step 65 : Incremental refresh was configured for the Dataflow.
+
+  The SQL Server Dataflow was selected and the **Incremental Refresh** option was opened. A DateTime column was required to configure incremental refresh.
+
+- Step 66 : Since the available date column was not in DateTime format, its data type was changed in Power Query Online.
+
+  The Dataflow table was opened for editing and Power Query Online was opened. The Loan_Date_DD_MM_YYYY column was changed from Date to DateTime data type.
+
+  The changes were then saved using the **Save & Close** option.
+
+- Step 67 : The Incremental Refresh settings were configured using the DateTime column.
+
+  The data was configured to retain a period of the past five years, with the latest 10 days configured for incremental refresh. This allows the latest 10 days of data to be refreshed while maintaining the historical data from the defined five-year period.
+
+- Step 68 : The option to remove data when the maximum value in the selected column changes was configured as required.
+
+  The **Only request complete days** option was also considered for cases where the data for the current day may be incomplete. This prevents partial-day data from being requested when complete-day data is required.
+
+- Step 69 : After configuring the Dataflow refresh settings, the report refresh settings were also configured.
+
+  The report was published, and the required refresh schedule and data source credentials were configured from the report settings. The **Schedule Refresh** option was enabled and the required credentials were provided through **Data Source Credentials → Edit Credentials**.
+
+ ## Insights
+
+- Home loans have the highest loan amount by purpose at **6,545M**, while Other loans have the lowest at **6,498M**.
+- The default rate varies across employment types, with **Unemployed applicants at 3.39%** and **Full-time employees at 2.36%**.
+- Average loan amount is highest among **Adults at 127,901** and lowest among **Teens at 126,674**.
+- Median loan amount is highest for the **Low credit score category at 128,397** and lowest for the **High credit score category at 127,149**.
+- Among Adults, total loan exposure is highest for the **Medium credit score category at approximately 4.6bn**.
+- The highest year-over-year loan amount change is **1.72877% in 2018**, while the lowest is **-1.53072% in 2014**.
+- The decomposition tree shows a total loan amount of **32,576,880,572**, with the **High Income** bracket contributing **21,731,557,581**. 
